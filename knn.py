@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn import datasets
+from random import randint
 
 def calc_distance(point: np.array, points: np.array):
     if len(point) != len(points[0,:]):
@@ -27,5 +28,7 @@ if __name__ == '__main__':
 
     iris = datasets.load_iris()
 
-    prediction = knn_predict(np.array([7.5, 2.5,3.0]), iris.data, iris.target, 5)
+    point = [randint(0,8) for _ in range (2)]
+
+    prediction = knn_predict(np.array(point), iris.data, iris.target, 5)
     print(prediction)
