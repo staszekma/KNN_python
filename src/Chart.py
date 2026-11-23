@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def Chart2D(x1, y1, x2=[], y2=[], x3=[], y3=[], x4=[], y4=[]):
+def Chart2D(x1:int, y1, x2=[], y2=[], x3=[], y3=[], x4=[], y4=[]): 
     
     c_1, c_2, c_3, c_4 = ["red"], ["green"], ["blue"], ["yellow"]
     l_1, l_2, l_3, l_4 = len(x1), len(x2), len(x3), len(x4)
@@ -12,6 +12,7 @@ def Chart2D(x1, y1, x2=[], y2=[], x3=[], y3=[], x4=[], y4=[]):
     
     ax.scatter(x, y, c=colors)
     plt.show()
+
 
 def Chart2D_c(x, y, color=[0,0,0,0]):
     Acc = 0

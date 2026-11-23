@@ -8,7 +8,7 @@ except ImportError as e:
 
 def main():
 
-    Chart2D([1, 2],[2, 3])
+    
 
 
 if __name__ == "__main__":
