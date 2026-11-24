@@ -6,11 +6,11 @@ from sklearn.model_selection import train_test_split
 
 class KNN:
     def __init__(self, dataset):
-        self.data = dataset
+        self.dataset = dataset
         self.last_acc = [] 
         self.last_k = []
         self.predictions = None
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data.data, self.data.target, test_size=0.2, random_state=0, stratify=self.data.target)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.dataset.data, self.dataset.target, test_size=0.2, random_state=0, stratify=self.dataset.target)
  
     def calc_distance(self, point: np.array, points: np.array) -> np.array:
         if len(point) != len(points[0,:]):
@@ -40,6 +40,10 @@ class KNN:
         return np.array([random.uniform(*point_range) for _ in range (dimension)])
 
     def predict(self, k:int):
+        data_size = len(self.X_train)
+        if(k > len(self.X_train)):
+            print(f"K of {k} is larger than dataset size of {data_size}, clamped to data_size")
+            k = data_size - 1
         self.last_k.append(k)
         self.predictions = np.array([self.predict_single(sample, self.X_train, self.y_train, k) for sample in self.X_test])
         self.last_acc.append(np.mean(self.predictions == self.y_test))
@@ -90,12 +94,10 @@ if __name__ == '__main__':
     mnist_dataset = datasets.load_digits()
     iris_dataset = datasets.load_iris()
 
-    k = 5
-
     iris = KNN(iris_dataset)
     mnist = KNN(mnist_dataset)
 
-    max_k = 20
+    max_k = 100
 
     print("---iris---")
     for k in range(1,max_k):
