@@ -39,7 +39,7 @@ class KNN:
     def random_point(self, dimension: int, point_range=[3,7]) -> np.array:
         return np.array([random.uniform(*point_range) for _ in range (dimension)])
 
-    def predict(self, k:int):
+    def predict(self, k:int) -> None:
         data_size = len(self.X_train)
         if(k > len(self.X_train)):
             print(f"K of {k} is larger than dataset size of {data_size}, clamped to data_size")
@@ -48,20 +48,20 @@ class KNN:
         self.predictions = np.array([self.predict_single(sample, self.X_train, self.y_train, k) for sample in self.X_test])
         self.last_acc.append(np.mean(self.predictions == self.y_test))
 
-    def print_accuracy(self):
+    def print_accuracy(self) -> None:
         if(self.predictions is None):
             print("Run predict() first")
             return
         print(f"Accuracy after {len(self.predictions)} predictions: {self.last_acc[-1]} (k={self.last_k[-1]})")
 
-    def plot_accuracy(self, ax, title):
+    def plot_accuracy(self, ax, title) ->None:
         ax.plot(self.last_k, self.last_acc)
         ax.set_title(title)
         ax.set_xlabel("k")
         ax.set_ylabel("accuracy")
 
         
-    def plot(self, point: np.array, training_data: np.array, training_target: np.array, prediction: int):
+    def plot(self, point: np.array, training_data: np.array, training_target: np.array, prediction: int)-> None:
         dim = len(point)
         pro = None
         if dim == 1:
