@@ -1,16 +1,18 @@
 import numpy as np
 from sklearn import datasets
+from sklearn.datasets import fetch_openml
 import random
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
 class KNN:
-    def __init__(self, dataset):
-        self.dataset = dataset
+    def __init__(self, dataset, target):
+        self.data= np.asarray(dataset)
+        self.target = np.asarray(target)
         self.last_acc = [] 
         self.last_k = []
         self.predictions = None
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.dataset.data, self.dataset.target, test_size=0.2, random_state=0, stratify=self.dataset.target)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data, self.target, test_size=0.2, random_state=0, stratify=self.target)
  
     def calc_distance(self, point: np.array, points: np.array) -> np.array:
         if len(point) != len(points[0,:]):
@@ -43,7 +45,7 @@ class KNN:
         data_size = len(self.X_train)
         if(k > len(self.X_train)):
             print(f"K of {k} is larger than dataset size of {data_size}, clamped to data_size")
-            k = data_size - 1
+            k = data_size
         self.last_k.append(k)
         self.predictions = np.array([self.predict_single(sample, self.X_train, self.y_train, k) for sample in self.X_test])
         self.last_acc.append(np.mean(self.predictions == self.y_test))
@@ -91,23 +93,33 @@ if __name__ == '__main__':
     # print(f"Predicted: {prediction} ({iris.target_names[prediction]})")
     # plot(point, iris.data, iris.target, prediction)
     
-    mnist_dataset = datasets.load_digits()
+    # mnist_dataset = datasets.load_digits()
+    
+    # the parser is set, because sklearn train_test_split doesnt like openml numbers as strings
+    mnist_dataset = fetch_openml('mnist_784', version=1, as_frame=False, parser='liac-arff') 
     iris_dataset = datasets.load_iris()
 
-    iris = KNN(iris_dataset)
-    mnist = KNN(mnist_dataset)
 
-    max_k = 100
+    data_size_limit = 5000
+    mnist_data = mnist_dataset.data[:data_size_limit].astype(np.float32)
+    mnist_target = mnist_dataset.target[:data_size_limit].astype(int)
+
+    print(mnist_data.shape, mnist_data.dtype, mnist_target.shape, mnist_target.dtype)
+
+    iris = KNN(iris_dataset.data, iris_dataset.target)
+    mnist = KNN(mnist_data, mnist_target)
+
+    max_k = 3
 
     print("---iris---")
-    for k in range(1,max_k):
+    for k in range(1,max_k+1):
         iris.predict(k)
         iris.print_accuracy()
 
     print("\n")
 
     print("---mnist---")
-    for k in range(1,max_k):
+    for k in range(1,max_k+1):
         mnist.predict(k)
         mnist.print_accuracy()
 
