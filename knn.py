@@ -12,14 +12,15 @@ class KNN:
         self.last_acc = [] 
         self.last_k = []
         self.predictions = None
+        self.neighbours = None
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data, self.target, test_size=0.2, random_state=0, stratify=self.target)
  
-    def calc_distance(self, point: np.array, points: np.array) -> np.array:
+    def calc_distance(self, point: np.ndarray, points: np.ndarray) -> np.array:
         if len(point) != len(points[0,:]):
             raise AttributeError("Sizes of matrices in calc_distance do not match")
         return np.sqrt(np.sum(((points - point)**2), axis=1)) 
 
-    def target_key(self, point: np.array, data: np.array, target: np.array, k:int) -> np.array:
+    def target_key(self, point: np.ndarray, data: np.ndarray, target: np.ndarray) -> np.ndarray:
         distances = self.calc_distance(point, data[:,0:len(point)])
         # key = sorted(zip(distances, target), key=lambda x: x[0])
         # a, b = zip(*key)
@@ -28,26 +29,33 @@ class KNN:
         # b = np.array(b)
         #
         # return b[0:k]
-        target_indices = np.argpartition(distances, k-1)[:k] # this returs indices of the k smallest distances, unsorted
+        # target_indices = np.argpartition(distances, k-1)[:k] # this returs indices of the k smallest distances, unsorted
+        target_indices = np.argsort(distances)
         return target[target_indices]
 
-    def count_keys(self, data: np.array) -> np.array:
-        return np.unique(data, return_counts=True);
+    def find_neighbours(self) -> None:
+        # neighbours is a 2d array, that stores all the neighbours for a X_train sample that coresponds to the row
+        self.neighbours = np.array([self.target_key(sample, self.X_train, self.y_train) for sample in self.X_test])        
 
-    def predict_single(self, point: np.array, training_data: np.array, training_target: np.array, k: int) -> np.array:
-        keys, counts = self.count_keys(self.target_key(point, training_data, training_target, k))
+    def count_keys(self, data: np.ndarray) -> np.ndarray:
+        return np.unique(data, return_counts=True)
+
+    def vote(self, neighbours:np.ndarray, k: int) -> np.ndarray:
+        keys, counts = self.count_keys(neighbours[:k])
         return keys[np.argmax(counts)]
 
-    def random_point(self, dimension: int, point_range=[3,7]) -> np.array:
+    def random_point(self, dimension: int, point_range=[3,7]) -> np.ndarray:
         return np.array([random.uniform(*point_range) for _ in range (dimension)])
 
     def predict(self, k:int) -> None:
-        data_size = len(self.X_train)
-        if(k > len(self.X_train)):
+        if self.neighbours is None:
+            self.find_neighbours()
+        data_size = self.neighbours.shape[1]
+        if(k > data_size):
             print(f"K of {k} is larger than dataset size of {data_size}, clamped to data_size")
             k = data_size
         self.last_k.append(k)
-        self.predictions = np.array([self.predict_single(sample, self.X_train, self.y_train, k) for sample in self.X_test])
+        self.predictions = np.array([self.vote(row, k) for row in self.neighbours])
         self.last_acc.append(np.mean(self.predictions == self.y_test))
 
     def print_accuracy(self) -> None:
@@ -95,21 +103,20 @@ if __name__ == '__main__':
     
     # mnist_dataset = datasets.load_digits()
     
-    # the parser is set, because sklearn train_test_split doesnt like openml numbers as strings
+    # the parser is set, because pandas parser used by openml is moody
     mnist_dataset = fetch_openml('mnist_784', version=1, as_frame=False, parser='liac-arff') 
     iris_dataset = datasets.load_iris()
 
+    data_size_limit = 10000
 
-    data_size_limit = 5000
     mnist_data = mnist_dataset.data[:data_size_limit].astype(np.float32)
     mnist_target = mnist_dataset.target[:data_size_limit].astype(int)
 
-    print(mnist_data.shape, mnist_data.dtype, mnist_target.shape, mnist_target.dtype)
 
     iris = KNN(iris_dataset.data, iris_dataset.target)
     mnist = KNN(mnist_data, mnist_target)
 
-    max_k = 3
+    max_k = 50
 
     print("---iris---")
     for k in range(1,max_k+1):
