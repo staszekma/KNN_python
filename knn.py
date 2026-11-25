@@ -4,6 +4,16 @@ from sklearn.datasets import fetch_openml
 import random
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
+from timeit import default_timer as timer
+
+def func_time(func): 
+    def wrapper(*args, **kwargs):
+        t1 = timer();
+        func(*args, **kwargs);
+        t2 = timer();
+        print(f"the {func.name} took {t2-t1}")
+    return wrapper
+
 
 class KNN:
     def __init__(self, dataset, target):
@@ -47,6 +57,7 @@ class KNN:
     def random_point(self, dimension: int, point_range=[3,7]) -> np.ndarray:
         return np.array([random.uniform(*point_range) for _ in range (dimension)])
 
+    # @func_time
     def predict(self, k:int) -> None:
         if self.neighbours is None:
             self.find_neighbours()
