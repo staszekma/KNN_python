@@ -19,7 +19,7 @@ if __name__ == '__main__':
     # first, the sklearn knn goes
     print("----- SKLEARN KNN -----")
     sk_accuracy = []
-    sk_single_time = []
+    sk_single_times = []
     sk_timer_start = timer()
     for k in range(1, max_k + 1):
         sk_single_time_start = timer()
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         predictions = sklearn_knn.predict(sk_x_test)
         sk_single_time_stop = timer()
         sk_single_pred_time = sk_single_time_stop - sk_single_time_start
-        sk_single_time.append(sk_single_pred_time)
+        sk_single_times.append(sk_single_pred_time)
         accuracy = np.mean(predictions == sk_y_test)
         sk_accuracy.append(accuracy)
         print(f"Accuracy: {accuracy} (k={k})")
@@ -40,23 +40,24 @@ if __name__ == '__main__':
     print("----- OUR KNN -----")
     our_timer_start = timer()
     my_knn = KNN(mnist_data, mnist_target)
-    our_single_time = []
+    our_single_times = []
     our_accuracy = []
     for k in range(1, max_k + 1):
         our_single_time_start = timer()
         my_knn.predict(k) 
         our_single_time_stop = timer()
         our_single_pred_time = our_single_time_stop - our_single_time_start
-        our_single_time.append(our_single_pred_time)
+        our_single_times.append(our_single_pred_time)
         accuracy = np.mean(my_knn.predictions == my_knn.y_test)
         our_accuracy.append(accuracy)
         print(f"Accuracy: {accuracy} (k={k})")
     our_timer_stop = timer()
     our_time = our_timer_stop - our_timer_start
     print(f"Predicting with k from 1 to {max_k} took our knn {our_time}s")
- 
-    fig, (ax_our, ax_sk, ax_diff) = plt.subplots(1, 3, figsize=(12, 5))
+    
+    fig, ((ax_our, ax_sk, ax_diff), (ax_our_time, ax_sk_time, ax_diff_time)) = plt.subplots(2, 3, figsize=(14, 9))
 
+    #accuracy
     ax_our.plot(range(1, max_k + 1), our_accuracy)
     ax_our.set_title("Our KNN accuracy vs K")
     ax_our.set_xlabel("k")
@@ -71,6 +72,22 @@ if __name__ == '__main__':
     ax_diff.set_title("Accuracy difference\n(sk - our)")
     ax_diff.set_xlabel("k")
     ax_diff.set_ylabel("accuracy diff")
+
+    #time
+    ax_our_time.plot(range(1, max_k + 1), our_single_times)
+    ax_our_time.set_title("Our KNN time vs K")
+    ax_our_time.set_xlabel("k")
+    ax_our_time.set_ylabel("time")
+
+    ax_sk_time.plot(range(1, max_k + 1), sk_single_times)
+    ax_sk_time.set_title("sklearn KNN time vs K")
+    ax_sk_time.set_xlabel("k")
+    ax_sk_time.set_ylabel("time")
+
+    ax_diff_time.plot(range(1, max_k + 1), np.array(sk_single_times) - np.array(our_single_times))
+    ax_diff_time.set_title("Time difference\n(sk - our)")
+    ax_diff_time.set_xlabel("k")
+    ax_diff_time.set_ylabel("time diff")
 
  
     fig.tight_layout()

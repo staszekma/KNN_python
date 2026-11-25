@@ -14,7 +14,6 @@ def func_time(func):
         print(f"the {func.name} took {t2-t1}")
     return wrapper
 
-
 class KNN:
     def __init__(self, dataset, target):
         self.data= np.asarray(dataset)
@@ -28,7 +27,8 @@ class KNN:
     def calc_distance(self, point: np.ndarray, points: np.ndarray) -> np.array:
         if len(point) != len(points[0,:]):
             raise AttributeError("Sizes of matrices in calc_distance do not match")
-        return np.sqrt(np.sum(((points - point)**2), axis=1)) 
+        # return np.sqrt(np.sum(((points - point)**2), axis=1)) 
+        return (np.sum(((points - point)**2), axis=1)) #sqrt is not needed, because it doesn't change the order anyway
 
     def target_key(self, point: np.ndarray, data: np.ndarray, target: np.ndarray) -> np.ndarray:
         distances = self.calc_distance(point, data[:,0:len(point)])
@@ -104,7 +104,6 @@ class KNN:
         plt.show()
 
 if __name__ == '__main__':
-
 
     # point = random_point(3)
     # print(f"Random point: {point}")
